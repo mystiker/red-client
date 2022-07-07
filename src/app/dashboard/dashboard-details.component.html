@@ -1,0 +1,23 @@
+<!-- sehr ugly, aber mir fehlt die Zeit für einen ordentlichen typ-seperator -->
+
+<div *ngIf="this.user$ | async as user">
+
+  <h1>Details for person {{ user.id }}</h1>
+
+  <ul *ngIf="user.resourceType === 'Patient'">
+    <li>Resource Type: {{ user.resourceType }}</li>
+    <li>Name: {{ user.name }}</li>
+    <li>ID: {{ user.id }}</li>
+    <li>Birthday: {{ user.birthDate }}</li>
+    <li>Gender: {{ user.gender }} </li>
+    <li>Adress: {{ user.adress }}</li>
+  </ul>
+
+  <ul *ngIf="user.resourceType === 'Practitioner'">
+    <li>Resource Type: {{ user.resourceType }}</li>
+    <li>Name: {{ user.name }}</li>
+    <li>ID: {{ user.id }}</li>
+    <li>Telecom: {{ user.telecom[0]?.value }}</li>
+  </ul>
+
+</div>
