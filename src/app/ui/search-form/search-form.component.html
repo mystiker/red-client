@@ -1,12 +1,12 @@
-<form>
+<form [formGroup]="this.searchFormGroup">
   <mat-form-field appearance="fill" class="search-input">
     <mat-label>Search for a person</mat-label>
-    <input matInput placeholder="ex. 'Paul'" [formControl]="this.searchField">
+    <input matInput placeholder="ex. 'Paul'" formControlName="searchField">
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="select-input">
     <mat-label>Resource Type</mat-label>
-    <mat-select [formControl]="this.typeField">
+    <mat-select formControlName="typeField">
         <mat-option *ngFor="let opt of this.enumType | keyvalue" [value]="opt.value">{{ opt.key }}</mat-option>
     </mat-select>
   </mat-form-field>

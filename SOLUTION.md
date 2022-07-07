@@ -9,3 +9,13 @@
 - Code sichten
 - Dummy Component Search-Form ausgebaut
 - Vorhandene Typen genutzt
+- Event rausgegeben
+- Event in Dashboard -> Subject<SearchParams>
+- Subject<SearchParams> -> search$
+
+
+
+
+
+
+## ISSUES

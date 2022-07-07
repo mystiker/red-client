@@ -1,7 +1,7 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { FhirSearchFn, ISearchFormData } from '@red-probeaufgabe/types';
-import { combineLatest, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 const INITIAL_SEARCH_VALUE = '';
@@ -12,36 +12,39 @@ const INITIAL_TYPE_VALUE = FhirSearchFn.SearchAll
   templateUrl: './search-form.component.html',
   styleUrls: ['./search-form.component.scss'],
 })
-export class SearchFormComponent implements OnDestroy {
+export class SearchFormComponent implements OnDestroy, OnInit {
 
   private readonly subscriptions = new Subscription();
 
   public readonly enumType = FhirSearchFn;
 
-  public readonly searchField = new FormControl(INITIAL_SEARCH_VALUE);
-  public readonly typeField = new FormControl(INITIAL_TYPE_VALUE);
+  public readonly searchFormGroup: FormGroup;
 
   @Output()
   public readonly searchChanged = new EventEmitter<ISearchFormData>();
 
   constructor() {
 
-    const searchFieldValue$ = this.searchField.valueChanges.pipe(
-      startWith(INITIAL_SEARCH_VALUE)
-    );
+    this.searchFormGroup = new FormGroup({
+      searchField: new FormControl(INITIAL_SEARCH_VALUE),
+      typeField: new FormControl(INITIAL_TYPE_VALUE)
+    });
+  }
 
-    const typeFieldValue$ = this.typeField.valueChanges.pipe(
-      startWith(INITIAL_TYPE_VALUE)
-    );
+  ngOnInit(): void {
 
-    const inputChange$ = combineLatest([searchFieldValue$, typeFieldValue$]).pipe(
-      map(([searchTerm, type]) => ({
-        searchText: searchTerm,
-        searchFuncSelect: type
+    const inputChange$: Observable<ISearchFormData> = this.searchFormGroup.valueChanges.pipe(
+      map(formValues => ({
+        searchText: formValues.searchField,
+        searchFuncSelect: formValues.typeField
+      })),
+      startWith(({
+        searchFuncSelect: INITIAL_TYPE_VALUE,
+        searchText: INITIAL_SEARCH_VALUE
       }))
     );
 
-    const inputChangeSub = inputChange$.subscribe(el => this.searchChanged.emit(el));
+    const inputChangeSub = inputChange$.subscribe(formData => this.searchChanged.emit(formData));
 
     this.subscriptions.add(inputChangeSub);
   }

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { catchError, map, shareReplay, startWith, tap } from 'rxjs/operators';
+import { Observable, of, ReplaySubject } from 'rxjs';
+import { catchError, map, shareReplay, startWith, tap, switchMap } from 'rxjs/operators';
 import { SiteTitleService } from '@red-probeaufgabe/core';
-import { FhirSearchFn, IFhirPatient, IFhirPractitioner, IFhirSearchResponse, ISearchFormData } from '@red-probeaufgabe/types';
+import { IFhirPatient, IFhirPractitioner, IFhirSearchResponse, ISearchFormData } from '@red-probeaufgabe/types';
 import { IUnicornTableColumn } from '@red-probeaufgabe/ui';
 import { AbstractSearchFacadeService } from '@red-probeaufgabe/search';
 
@@ -12,6 +12,9 @@ import { AbstractSearchFacadeService } from '@red-probeaufgabe/search';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
+
+  private readonly searchConditions = new ReplaySubject<ISearchFormData>();
+
   // Init unicorn columns to display
   columns: Set<IUnicornTableColumn> = new Set<IUnicornTableColumn>([
     'number',
@@ -20,20 +23,34 @@ export class DashboardComponent {
     'gender',
     'birthDate',
   ]);
+
   isLoading = true;
 
   /*
    * Implement search on keyword or fhirSearchFn change
    **/
-  search$: Observable<IFhirSearchResponse<IFhirPatient | IFhirPractitioner>> = this.searchFacade
-    .search(FhirSearchFn.SearchAll, '')
-    .pipe(
-      catchError(this.handleError),
-      tap((data) => {
-        this.isLoading = false;
-      }),
-      shareReplay(),
-    );
+  // old code
+  // search$: Observable<IFhirSearchResponse<IFhirPatient | IFhirPractitioner>> = this.searchFacade
+  //   .search(FhirSearchFn.SearchAll, '')
+  //   .pipe(
+  //     catchError(this.handleError),
+  //     // antipattern detected :)
+  //     tap((data: IFhirSearchResponse<IFhirPatient | IFhirPractitioner>) => {
+  //       this.isLoading = false;
+  //     }),
+  //     shareReplay(),
+  //   );
+
+  // new code - 
+  search$: Observable<IFhirSearchResponse<IFhirPatient | IFhirPractitioner>> = this.searchConditions.pipe(
+    switchMap(conditions => this.searchFacade.search(conditions.searchFuncSelect, conditions.searchText).pipe(
+      catchError(this.handleError)
+    )),
+    tap((data: IFhirSearchResponse<IFhirPatient | IFhirPractitioner>) => {
+      this.isLoading = false;
+    }),
+    shareReplay()
+  );
 
   entries$: Observable<Array<IFhirPatient | IFhirPractitioner>> = this.search$.pipe(
     map((data) => !!data && data.entry),
@@ -54,6 +71,6 @@ export class DashboardComponent {
   }
 
   public onSearchChanged(data: ISearchFormData) {
-    console.log("Got new data!", data);
+    this.searchConditions.next(data);
   }
 }
