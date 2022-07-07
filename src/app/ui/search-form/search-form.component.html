@@ -2,6 +2,15 @@
   <mat-form-field appearance="fill" class="search-input">
     <mat-label>Search for a person</mat-label>
     <input matInput placeholder="ex. 'Paul'" formControlName="searchField">
+    <mat-error *ngIf="this.searchFormGroup.controls['searchField'].hasError('noWhiteSpaces')">
+      Whitespaces are not allowed!
+    </mat-error>
+    <mat-error *ngIf="this.searchFormGroup.controls['searchField'].hasError('noVowels')">
+      Vowels are not allowed!
+    </mat-error>
+    <mat-error *ngIf="this.searchFormGroup.controls['searchField'].hasError('onlyAlphaNumeric')">
+      Only letters and numbers are allowed!
+    </mat-error>
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="select-input">

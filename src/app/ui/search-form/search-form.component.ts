@@ -1,8 +1,8 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { FhirSearchFn, ISearchFormData } from '@red-probeaufgabe/types';
 import { Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { filter, map, startWith, tap } from 'rxjs/operators';
 
 const INITIAL_SEARCH_VALUE = '';
 const INITIAL_TYPE_VALUE = FhirSearchFn.SearchAll
@@ -26,7 +26,11 @@ export class SearchFormComponent implements OnDestroy, OnInit {
   constructor() {
 
     this.searchFormGroup = new FormGroup({
-      searchField: new FormControl(INITIAL_SEARCH_VALUE),
+      searchField: new FormControl(INITIAL_SEARCH_VALUE, [
+        onlyAlphaNumericValidator(),
+        noWhiteSpaceValidator(),
+        noVowelValidator()
+      ]),
       typeField: new FormControl(INITIAL_TYPE_VALUE)
     });
   }
@@ -41,7 +45,8 @@ export class SearchFormComponent implements OnDestroy, OnInit {
       startWith(({
         searchFuncSelect: INITIAL_TYPE_VALUE,
         searchText: INITIAL_SEARCH_VALUE
-      }))
+      })),
+      filter(_ => this.searchFormGroup.valid)
     );
 
     const inputChangeSub = inputChange$.subscribe(formData => this.searchChanged.emit(formData));
@@ -53,4 +58,31 @@ export class SearchFormComponent implements OnDestroy, OnInit {
 
     this.subscriptions.unsubscribe();
   }
+}
+
+function onlyAlphaNumericValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+
+    const forbidden = /^[\w\d]*$/mg.test(control.value);
+
+    return !forbidden ? { onlyAlphaNumeric: { value: control.value } } : null;
+  };
+}
+
+function noWhiteSpaceValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+
+    const forbidden = /^[\S]*$/mg.test(control.value);
+
+    return !forbidden ? { noWhiteSpaces: { value: control.value } } : null;
+  };
+}
+
+function noVowelValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+
+    const forbidden = /[öäü]/mg.test(control.value);
+
+    return forbidden ? { noVowels: { value: control.value } } : null;
+  };
 }

@@ -29,17 +29,6 @@ export class DashboardComponent {
   /*
    * Implement search on keyword or fhirSearchFn change
    **/
-  // old code
-  // search$: Observable<IFhirSearchResponse<IFhirPatient | IFhirPractitioner>> = this.searchFacade
-  //   .search(FhirSearchFn.SearchAll, '')
-  //   .pipe(
-  //     catchError(this.handleError),
-  //     // antipattern detected :)
-  //     tap((data: IFhirSearchResponse<IFhirPatient | IFhirPractitioner>) => {
-  //       this.isLoading = false;
-  //     }),
-  //     shareReplay(),
-  //   );
 
   // new code - 
   search$: Observable<IFhirSearchResponse<IFhirPatient | IFhirPractitioner>> = this.searchConditions.pipe(
