@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, shareReplay, startWith, tap } from 'rxjs/operators';
 import { SiteTitleService } from '@red-probeaufgabe/core';
-import { FhirSearchFn, IFhirPatient, IFhirPractitioner, IFhirSearchResponse } from '@red-probeaufgabe/types';
+import { FhirSearchFn, IFhirPatient, IFhirPractitioner, IFhirSearchResponse, ISearchFormData } from '@red-probeaufgabe/types';
 import { IUnicornTableColumn } from '@red-probeaufgabe/ui';
 import { AbstractSearchFacadeService } from '@red-probeaufgabe/search';
 
@@ -51,5 +51,9 @@ export class DashboardComponent {
 
   private handleError(): Observable<IFhirSearchResponse<IFhirPatient | IFhirPractitioner>> {
     return of({ entry: [], total: 0 });
+  }
+
+  public onSearchChanged(data: ISearchFormData) {
+    console.log("Got new data!", data);
   }
 }

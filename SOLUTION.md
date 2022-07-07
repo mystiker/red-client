@@ -6,3 +6,6 @@
 - switch that and go
 
 ## Aufgabe 2
+- Code sichten
+- Dummy Component Search-Form ausgebaut
+- Vorhandene Typen genutzt
